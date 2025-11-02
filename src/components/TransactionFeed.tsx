@@ -87,21 +87,65 @@ export default function TransactionFeed({ onViewAll }: TransactionFeedProps) {
     return () => clearInterval(interval)
   }, [])
 
-  // Merge demo transactions from localStorage with fetched transactions
-  useEffect(() => {
+  // Load and merge demo transactions from localStorage
+  const loadDemoTransactions = () => {
     const demoTransactions = localStorage.getItem('demo_transactions')
     if (demoTransactions) {
       try {
-        const parsed = JSON.parse(demoTransactions)
-        // Merge with existing transactions, remove duplicates
+        const parsed = JSON.parse(demoTransactions) as Transaction[]
+        // Merge with existing transactions, remove duplicates, sort by timestamp (newest first)
         setTransactions(prev => {
           const existingIds = new Set(prev.map(t => t.id))
           const newDemos = parsed.filter((t: Transaction) => !existingIds.has(t.id))
-          return [...newDemos, ...prev]
+          const allTransactions = [...newDemos, ...prev]
+          // Sort by timestamp (newest first)
+          return allTransactions.sort((a, b) => 
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          )
         })
       } catch (error) {
         console.error('Error parsing demo transactions:', error)
       }
+    }
+  }
+
+  // Load demo transactions on mount and when window focuses (after reload)
+  useEffect(() => {
+    loadDemoTransactions()
+    
+    // Also reload when window gets focus (handles page reload case)
+    const handleFocus = () => {
+      setTimeout(loadDemoTransactions, 100)
+    }
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [])
+
+  // Listen for new transaction events (immediate update without reload)
+  useEffect(() => {
+    const handleTransactionCreated = (event: CustomEvent) => {
+      const newTransaction = event.detail as Transaction
+      // Add new transaction immediately to the top of the list
+      setTransactions(prev => {
+        // Check if transaction already exists
+        if (prev.some(t => t.id === newTransaction.id)) {
+          return prev
+        }
+        // Add to top and sort by timestamp (newest first)
+        const updated = [newTransaction, ...prev]
+        return updated.sort((a, b) => 
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        )
+      })
+    }
+
+    window.addEventListener('transactionCreated', handleTransactionCreated as EventListener)
+    
+    return () => {
+      window.removeEventListener('transactionCreated', handleTransactionCreated as EventListener)
     }
   }, [])
 

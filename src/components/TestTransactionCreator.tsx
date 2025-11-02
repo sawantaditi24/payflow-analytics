@@ -103,11 +103,15 @@ export default function TestTransactionCreator() {
       // Keep only last 20
       localStorage.setItem('demo_transactions', JSON.stringify(transactions.slice(0, 20)))
 
-      // Trigger page refresh to show new transaction
-      window.location.reload()
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('transactionCreated', { detail: newTransaction }))
+      
+      // Small delay to ensure localStorage is updated, then refresh
+      setTimeout(() => {
+        window.location.reload()
+      }, 100)
     } catch (error) {
       console.error('Error creating test transaction:', error)
-    } finally {
       setIsCreating(false)
     }
   }
@@ -122,11 +126,21 @@ export default function TestTransactionCreator() {
   }
 
   const handleCustomCreate = () => {
+    const amount = parseFloat(customAmount)
+    if (!amount || amount < 0.50) {
+      alert('Please enter a valid amount (minimum $0.50)')
+      return
+    }
+    
     createTestTransaction({
-      amount: parseFloat(customAmount) || 25.00,
+      amount: amount,
       status: customStatus,
       customer: `custom-${Date.now()}@example.com`
     })
+    
+    // Reset custom form
+    setCustomAmount('25.00')
+    setCustomStatus('succeeded')
   }
 
   return (
