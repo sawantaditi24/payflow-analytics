@@ -22,19 +22,52 @@ export default function FraudDetection({ onViewAll }: FraudDetectionProps) {
   const [alerts, setAlerts] = useState<FraudAlert[]>([])
 
   useEffect(() => {
+    // Check for demo transactions and create alerts
+    const checkDemoTransactions = () => {
+      const demoTransactions = localStorage.getItem('demo_transactions')
+      if (demoTransactions) {
+        try {
+          const transactions = JSON.parse(demoTransactions)
+          
+          setAlerts(prev => {
+            const newAlerts: FraudAlert[] = []
+            
+            // Check for high amount transactions (> $1,000)
+            transactions.forEach((txn: any) => {
+              if (txn.amount > 1000 && txn.status === 'succeeded') {
+                const alertId = `alert_${txn.id}_high_amount`
+                const alertExists = prev.some(a => a.id === alertId)
+                
+                if (!alertExists) {
+                  newAlerts.push({
+                    id: alertId,
+                    type: 'high_amount',
+                    severity: 'high',
+                    description: `Unusually high transaction amount detected: $${txn.amount.toFixed(2)}`,
+                    amount: txn.amount,
+                    customer: txn.customer,
+                    timestamp: txn.timestamp,
+                    status: 'investigating'
+                  })
+                }
+              }
+            })
+            
+            if (newAlerts.length > 0) {
+              return [...newAlerts, ...prev.slice(0, 9 - newAlerts.length)]
+            }
+            return prev
+          })
+        } catch (error) {
+          console.error('Error checking demo transactions:', error)
+        }
+      }
+    }
+
+    // Initial mock alerts
     const mockAlerts: FraudAlert[] = [
       {
         id: 'alert_001',
-        type: 'high_amount',
-        severity: 'high',
-        description: 'Unusually high transaction amount detected',
-        amount: 5000.00,
-        customer: 'customer@email.com',
-        timestamp: new Date().toISOString(),
-        status: 'investigating'
-      },
-      {
-        id: 'alert_002',
         type: 'unusual_location',
         severity: 'medium',
         description: 'Transaction from new geographic location',
@@ -44,7 +77,7 @@ export default function FraudDetection({ onViewAll }: FraudDetectionProps) {
         status: 'investigating'
       },
       {
-        id: 'alert_003',
+        id: 'alert_002',
         type: 'rapid_transactions',
         severity: 'medium',
         description: 'Multiple rapid transactions detected',
@@ -57,26 +90,40 @@ export default function FraudDetection({ onViewAll }: FraudDetectionProps) {
     
     setAlerts(mockAlerts)
 
+    // Check demo transactions immediately
+    checkDemoTransactions()
+
+    // Check demo transactions every 5 seconds
+    const checkInterval = setInterval(checkDemoTransactions, 5000)
+
     // Simulate new fraud alerts
     const interval = setInterval(() => {
-      const alertTypes: FraudAlert['type'][] = ['high_amount', 'unusual_location', 'rapid_transactions', 'suspicious_pattern']
-      const severities: FraudAlert['severity'][] = ['high', 'medium', 'low']
+      const alertTypes: FraudAlert['type'][] = ['unusual_location', 'rapid_transactions', 'suspicious_pattern']
+      const severities: FraudAlert['severity'][] = ['medium', 'low']
       
       const newAlert: FraudAlert = {
         id: `alert_${Date.now()}`,
         type: alertTypes[Math.floor(Math.random() * alertTypes.length)],
         severity: severities[Math.floor(Math.random() * severities.length)],
         description: 'Suspicious activity pattern detected',
-        amount: Math.random() * 1000 + 50,
+        amount: Math.random() * 500 + 50,
         customer: `customer${Math.floor(Math.random() * 1000)}@email.com`,
         timestamp: new Date().toISOString(),
         status: 'investigating'
       }
       
-      setAlerts(prev => [newAlert, ...prev.slice(0, 4)])
+      setAlerts(prev => {
+        if (!prev.some(a => a.id === newAlert.id)) {
+          return [newAlert, ...prev.slice(0, 9)]
+        }
+        return prev
+      })
     }, 15000)
 
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      clearInterval(checkInterval)
+    }
   }, [])
 
   const getSeverityColor = (severity: string) => {

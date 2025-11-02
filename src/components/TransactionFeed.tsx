@@ -87,6 +87,24 @@ export default function TransactionFeed({ onViewAll }: TransactionFeedProps) {
     return () => clearInterval(interval)
   }, [])
 
+  // Merge demo transactions from localStorage with fetched transactions
+  useEffect(() => {
+    const demoTransactions = localStorage.getItem('demo_transactions')
+    if (demoTransactions) {
+      try {
+        const parsed = JSON.parse(demoTransactions)
+        // Merge with existing transactions, remove duplicates
+        setTransactions(prev => {
+          const existingIds = new Set(prev.map(t => t.id))
+          const newDemos = parsed.filter((t: Transaction) => !existingIds.has(t.id))
+          return [...newDemos, ...prev]
+        })
+      } catch (error) {
+        console.error('Error parsing demo transactions:', error)
+      }
+    }
+  }, [])
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'succeeded':
