@@ -20,8 +20,8 @@ export default function Dashboard() {
             <MetricsCards />
             <AnalyticsCharts />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <TransactionFeed />
-              <FraudDetection />
+              <TransactionFeed onViewAll={() => setActiveTab('transactions')} />
+              <FraudDetection onViewAll={() => setActiveTab('fraud')} />
             </div>
             <TestTransactionCreator />
           </div>

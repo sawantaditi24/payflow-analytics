@@ -14,7 +14,11 @@ interface FraudAlert {
   status: 'investigating' | 'resolved' | 'false_positive'
 }
 
-export default function FraudDetection() {
+interface FraudDetectionProps {
+  onViewAll?: () => void
+}
+
+export default function FraudDetection({ onViewAll }: FraudDetectionProps) {
   const [alerts, setAlerts] = useState<FraudAlert[]>([])
 
   useEffect(() => {
@@ -184,7 +188,10 @@ export default function FraudDetection() {
           <span className="text-gray-500">
             {alerts.length} active alerts
           </span>
-          <button className="text-blue-600 hover:text-blue-700 font-medium">
+          <button 
+            onClick={onViewAll || (() => {})}
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
             View All →
           </button>
         </div>

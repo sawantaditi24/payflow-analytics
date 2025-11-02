@@ -15,7 +15,11 @@ interface Transaction {
   receipt_url?: string
 }
 
-export default function TransactionFeed() {
+interface TransactionFeedProps {
+  onViewAll?: () => void
+}
+
+export default function TransactionFeed({ onViewAll }: TransactionFeedProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -182,9 +186,19 @@ export default function TransactionFeed() {
       </div>
       
       <div className="p-4 bg-gray-50 border-t border-gray-200">
-        <p className="text-sm text-gray-500 text-center">
-          Showing {transactions.length} recent transactions
-        </p>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-500">
+            Showing {transactions.length} recent transactions
+          </span>
+          {onViewAll && (
+            <button 
+              onClick={onViewAll}
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
+              View All →
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
