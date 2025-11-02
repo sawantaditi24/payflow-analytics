@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# markdown files (keep README.md for git, exclude others for personal reference)
+ARCHITECTURE_EXPLAINED.md
+GHC_PRESENTATION_GUIDE.md
+QUICK_REFERENCE.md
