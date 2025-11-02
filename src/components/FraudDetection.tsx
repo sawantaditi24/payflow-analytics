@@ -180,49 +180,49 @@ export default function FraudDetection({ onViewAll }: FraudDetectionProps) {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center justify-between">
+      <div className="p-4 md:p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center space-x-2">
-            <Shield className="w-5 h-5 text-blue-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Fraud Detection</h3>
+            <Shield className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+            <h3 className="text-base md:text-lg font-semibold text-gray-900">Fraud Detection</h3>
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-            <span className="text-sm text-gray-500">Monitoring</span>
+            <span className="text-xs md:text-sm text-gray-500">Monitoring</span>
           </div>
         </div>
       </div>
       
       <div className="max-h-96 overflow-y-auto">
         {alerts.length === 0 ? (
-          <div className="p-6 text-center">
-            <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-            <p className="text-gray-500">No fraud alerts detected</p>
-            <p className="text-sm text-gray-400">System is monitoring transactions</p>
+          <div className="p-4 md:p-6 text-center">
+            <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-green-500 mx-auto mb-3" />
+            <p className="text-sm md:text-base text-gray-500">No fraud alerts detected</p>
+            <p className="text-xs md:text-sm text-gray-400">System is monitoring transactions</p>
           </div>
         ) : (
           alerts.map((alert, index) => (
-            <div key={alert.id} className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${index === 0 ? 'bg-red-50' : ''}`}>
-              <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-3">
-                  <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5" />
-                  <div>
-                    <div className="flex items-center space-x-2 mb-1">
+            <div key={alert.id} className={`p-3 md:p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${index === 0 ? 'bg-red-50' : ''}`}>
+              <div className="flex items-start justify-between flex-wrap gap-2">
+                <div className="flex items-start space-x-2 md:space-x-3 min-w-0 flex-1">
+                  <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center space-x-2 mb-1 flex-wrap">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getSeverityColor(alert.severity)}`}>
                         {alert.severity.toUpperCase()}
                       </span>
                       <span className="text-xs text-gray-500">{getTypeDescription(alert.type)}</span>
                     </div>
-                    <p className="text-sm text-gray-900 mb-1">{alert.description}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs md:text-sm text-gray-900 mb-1">{alert.description}</p>
+                    <p className="text-xs text-gray-500 truncate">
                       ${alert.amount.toFixed(2)} • {alert.customer}
                     </p>
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-shrink-0">
                   {getStatusIcon(alert.status)}
-                  <span className="text-xs text-gray-500">{formatTime(alert.timestamp)}</span>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">{formatTime(alert.timestamp)}</span>
                 </div>
               </div>
             </div>
@@ -230,14 +230,14 @@ export default function FraudDetection({ onViewAll }: FraudDetectionProps) {
         )}
       </div>
       
-      <div className="p-4 bg-gray-50 border-t border-gray-200">
-        <div className="flex items-center justify-between text-sm">
+      <div className="p-3 md:p-4 bg-gray-50 border-t border-gray-200">
+        <div className="flex items-center justify-between text-xs md:text-sm flex-wrap gap-2">
           <span className="text-gray-500">
             {alerts.length} active alerts
           </span>
           <button 
             onClick={onViewAll || (() => {})}
-            className="text-blue-600 hover:text-blue-700 font-medium"
+            className="text-blue-600 hover:text-blue-700 font-medium text-xs md:text-sm"
           >
             View All →
           </button>

@@ -144,13 +144,13 @@ export default function TestTransactionCreator() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div className="flex items-center space-x-2 mb-4">
-        <Plus className="w-5 h-5 text-blue-600" />
-        <h3 className="text-lg font-semibold text-gray-900">Create Test Transactions</h3>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
+      <div className="flex items-center space-x-2 mb-3 md:mb-4">
+        <Plus className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+        <h3 className="text-base md:text-lg font-semibold text-gray-900">Create Test Transactions</h3>
       </div>
 
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-xs md:text-sm text-gray-600 mb-3 md:mb-4">
         Select a scenario to demonstrate different payment types and fraud detection:
       </p>
       

@@ -49,24 +49,24 @@ export default function MetricsCards() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
       {metrics.map((metric, index) => {
         const Icon = metric.icon
         return (
-          <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+          <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">{metric.title}</p>
-                <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
-                <div className="flex items-center mt-2">
-                  <span className={`text-sm font-medium ${metric.changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm font-medium text-gray-600 mb-1">{metric.title}</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900">{metric.value}</p>
+                <div className="flex items-center mt-2 flex-wrap">
+                  <span className={`text-xs md:text-sm font-medium ${metric.changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
                     {metric.change}
                   </span>
-                  <span className="text-sm text-gray-500 ml-1">vs last month</span>
+                  <span className="text-xs md:text-sm text-gray-500 ml-1">vs last month</span>
                 </div>
               </div>
-              <div className={`p-3 rounded-lg ${getColorClasses(metric.color)}`}>
-                <Icon className="w-6 h-6" />
+              <div className={`p-2 md:p-3 rounded-lg ${getColorClasses(metric.color)} flex-shrink-0 ml-2`}>
+                <Icon className="w-5 h-5 md:w-6 md:h-6" />
               </div>
             </div>
           </div>

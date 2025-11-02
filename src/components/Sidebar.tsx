@@ -7,15 +7,18 @@ import {
   Home,
   TrendingUp,
   AlertTriangle,
-  Plus
+  Plus,
+  X
 } from 'lucide-react'
 
 interface SidebarProps {
   activeTab: string
   setActiveTab: (tab: string) => void
+  isOpen?: boolean
+  onClose?: () => void
 }
 
-export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
+export default function Sidebar({ activeTab, setActiveTab, isOpen = false, onClose }: SidebarProps) {
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: Home },
     { id: 'transactions', label: 'Transactions', icon: CreditCard },
@@ -25,8 +28,13 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   ]
 
   return (
-    <div className="w-64 bg-white shadow-lg border-r border-gray-200">
-      <div className="p-6">
+    <div className={`
+      fixed md:static inset-y-0 left-0 z-50
+      w-64 bg-white shadow-lg border-r border-gray-200
+      transform transition-transform duration-300 ease-in-out
+      ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+    `}>
+      <div className="p-6 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-white" />
@@ -36,6 +44,15 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
             <p className="text-sm text-gray-500">Analytics</p>
           </div>
         </div>
+        {/* Mobile close button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden p-2 text-gray-400 hover:text-gray-600"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
       
       <nav className="px-4 pb-4">

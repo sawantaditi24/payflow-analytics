@@ -11,15 +11,16 @@ import TestTransactionCreator from '@/components/TestTransactionCreator'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <MetricsCards />
             <AnalyticsCharts />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
               <TransactionFeed onViewAll={() => setActiveTab('transactions')} />
               <FraudDetection onViewAll={() => setActiveTab('fraud')} />
             </div>
@@ -40,11 +41,30 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-6">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={(tab) => {
+          setActiveTab(tab)
+          setSidebarOpen(false) // Close sidebar on mobile when tab is selected
+        }}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-hidden w-full">
+        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 md:p-6">
           <div className="max-w-7xl mx-auto">
             {renderContent()}
           </div>

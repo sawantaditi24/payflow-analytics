@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts'
 
 const revenueData = [
@@ -18,12 +19,27 @@ const paymentMethodsData = [
 ]
 
 export default function AnalyticsCharts() {
+  const [chartHeight, setChartHeight] = useState(250)
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (typeof window !== 'undefined') {
+        setChartHeight(window.innerWidth < 768 ? 250 : 300)
+      }
+    }
+    updateHeight()
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', updateHeight)
+      return () => window.removeEventListener('resize', updateHeight)
+    }
+  }, [])
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
       {/* Revenue Trend Chart */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Trend</h3>
-        <ResponsiveContainer width="100%" height={300}>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Revenue Trend</h3>
+        <ResponsiveContainer width="100%" height={chartHeight}>
           <LineChart data={revenueData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis 
@@ -58,9 +74,9 @@ export default function AnalyticsCharts() {
       </div>
 
       {/* Transaction Volume Chart */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Transaction Volume</h3>
-        <ResponsiveContainer width="100%" height={300}>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Transaction Volume</h3>
+        <ResponsiveContainer width="100%" height={chartHeight}>
           <BarChart data={revenueData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis 
@@ -91,9 +107,9 @@ export default function AnalyticsCharts() {
       </div>
 
       {/* Payment Methods Pie Chart */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Methods</h3>
-        <ResponsiveContainer width="100%" height={300}>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Payment Methods</h3>
+        <ResponsiveContainer width="100%" height={chartHeight}>
           <PieChart>
             <Pie
               data={paymentMethodsData}
@@ -137,9 +153,9 @@ export default function AnalyticsCharts() {
       </div>
 
       {/* Success Rate Chart */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Success Rate Trend</h3>
-        <ResponsiveContainer width="100%" height={300}>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Success Rate Trend</h3>
+        <ResponsiveContainer width="100%" height={chartHeight}>
           <LineChart data={revenueData.map(item => ({ ...item, successRate: 95 + Math.random() * 4 }))}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis 
