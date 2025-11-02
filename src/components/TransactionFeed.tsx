@@ -24,6 +24,23 @@ export default function TransactionFeed({ onViewAll }: TransactionFeedProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const mergeDemoTransactions = (apiTransactions: Transaction[]) => {
+    // Always merge demo transactions with API transactions
+    const demoTransactions = localStorage.getItem('demo_transactions')
+    if (demoTransactions) {
+      try {
+        const parsed = JSON.parse(demoTransactions) as Transaction[]
+        const apiIds = new Set(apiTransactions.map(t => t.id))
+        // Add demo transactions that aren't already in API results
+        const demoOnly = parsed.filter((t: Transaction) => !apiIds.has(t.id))
+        return [...demoOnly, ...apiTransactions]
+      } catch (error) {
+        console.error('Error parsing demo transactions:', error)
+      }
+    }
+    return apiTransactions
+  }
+
   const fetchTransactions = async () => {
     try {
       setLoading(true)
@@ -34,94 +51,115 @@ export default function TransactionFeed({ onViewAll }: TransactionFeedProps) {
       }
       
       const data = await response.json()
-      setTransactions(data.transactions || [])
+      const apiTransactions = data.transactions || []
+      
+      // Merge with demo transactions (demo transactions take priority - appear first)
+      const mergedTransactions = mergeDemoTransactions(apiTransactions)
+      
+      // Sort by timestamp (newest first)
+      const sortedTransactions = mergedTransactions.sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      )
+      
+      setTransactions(sortedTransactions)
       setError(null)
     } catch (err) {
       console.error('Error fetching transactions:', err)
       setError('Failed to load transactions. Using demo data.')
       
-      // Fallback to demo data if Stripe API fails
-      const mockTransactions: Transaction[] = [
-        {
-          id: 'txn_001',
-          amount: 125.50,
-          currency: 'USD',
-          status: 'succeeded',
-          customer: 'john.doe@email.com',
-          timestamp: new Date().toISOString(),
-          method: 'card',
-          description: 'Demo transaction'
-        },
-        {
-          id: 'txn_002',
-          amount: 89.99,
-          currency: 'USD',
-          status: 'pending',
-          customer: 'jane.smith@email.com',
-          timestamp: new Date(Date.now() - 30000).toISOString(),
-          method: 'bank_transfer',
-          description: 'Demo transaction'
-        },
-        {
-          id: 'txn_003',
-          amount: 250.00,
-          currency: 'USD',
-          status: 'failed',
-          customer: 'bob.wilson@email.com',
-          timestamp: new Date(Date.now() - 60000).toISOString(),
-          method: 'card',
-          description: 'Demo transaction'
+      // Load demo transactions if API fails
+      const demoTransactions = localStorage.getItem('demo_transactions')
+      if (demoTransactions) {
+        try {
+          const parsed = JSON.parse(demoTransactions) as Transaction[]
+          const sorted = parsed.sort((a, b) => 
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          )
+          setTransactions(sorted)
+        } catch (error) {
+          // Fallback to mock data
+          const mockTransactions: Transaction[] = [
+            {
+              id: 'txn_001',
+              amount: 125.50,
+              currency: 'USD',
+              status: 'succeeded',
+              customer: 'john.doe@email.com',
+              timestamp: new Date().toISOString(),
+              method: 'card',
+              description: 'Demo transaction'
+            },
+            {
+              id: 'txn_002',
+              amount: 89.99,
+              currency: 'USD',
+              status: 'pending',
+              customer: 'jane.smith@email.com',
+              timestamp: new Date(Date.now() - 30000).toISOString(),
+              method: 'bank_transfer',
+              description: 'Demo transaction'
+            },
+            {
+              id: 'txn_003',
+              amount: 250.00,
+              currency: 'USD',
+              status: 'failed',
+              customer: 'bob.wilson@email.com',
+              timestamp: new Date(Date.now() - 60000).toISOString(),
+              method: 'card',
+              description: 'Demo transaction'
+            }
+          ]
+          setTransactions(mockTransactions)
         }
-      ]
-      setTransactions(mockTransactions)
+      } else {
+        // Fallback to mock data
+        const mockTransactions: Transaction[] = [
+          {
+            id: 'txn_001',
+            amount: 125.50,
+            currency: 'USD',
+            status: 'succeeded',
+            customer: 'john.doe@email.com',
+            timestamp: new Date().toISOString(),
+            method: 'card',
+            description: 'Demo transaction'
+          },
+          {
+            id: 'txn_002',
+            amount: 89.99,
+            currency: 'USD',
+            status: 'pending',
+            customer: 'jane.smith@email.com',
+            timestamp: new Date(Date.now() - 30000).toISOString(),
+            method: 'bank_transfer',
+            description: 'Demo transaction'
+          },
+          {
+            id: 'txn_003',
+            amount: 250.00,
+            currency: 'USD',
+            status: 'failed',
+            customer: 'bob.wilson@email.com',
+            timestamp: new Date(Date.now() - 60000).toISOString(),
+            method: 'card',
+            description: 'Demo transaction'
+          }
+        ]
+        setTransactions(mockTransactions)
+      }
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
+    // Initial fetch
     fetchTransactions()
 
-    // Refresh every 30 seconds
+    // Refresh every 30 seconds (merged with demo transactions each time)
     const interval = setInterval(fetchTransactions, 30000)
     return () => clearInterval(interval)
-  }, [])
-
-  // Load and merge demo transactions from localStorage
-  const loadDemoTransactions = () => {
-    const demoTransactions = localStorage.getItem('demo_transactions')
-    if (demoTransactions) {
-      try {
-        const parsed = JSON.parse(demoTransactions) as Transaction[]
-        // Merge with existing transactions, remove duplicates, sort by timestamp (newest first)
-        setTransactions(prev => {
-          const existingIds = new Set(prev.map(t => t.id))
-          const newDemos = parsed.filter((t: Transaction) => !existingIds.has(t.id))
-          const allTransactions = [...newDemos, ...prev]
-          // Sort by timestamp (newest first)
-          return allTransactions.sort((a, b) => 
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          )
-        })
-      } catch (error) {
-        console.error('Error parsing demo transactions:', error)
-      }
-    }
-  }
-
-  // Load demo transactions on mount and when window focuses (after reload)
-  useEffect(() => {
-    loadDemoTransactions()
-    
-    // Also reload when window gets focus (handles page reload case)
-    const handleFocus = () => {
-      setTimeout(loadDemoTransactions, 100)
-    }
-    window.addEventListener('focus', handleFocus)
-    
-    return () => {
-      window.removeEventListener('focus', handleFocus)
-    }
   }, [])
 
   // Listen for new transaction events (immediate update without reload)
@@ -144,8 +182,33 @@ export default function TransactionFeed({ onViewAll }: TransactionFeedProps) {
 
     window.addEventListener('transactionCreated', handleTransactionCreated as EventListener)
     
+    // Also refresh demo transactions after a short delay (handles page reload)
+    const handleFocus = () => {
+      setTimeout(() => {
+        const demoTransactions = localStorage.getItem('demo_transactions')
+        if (demoTransactions) {
+          try {
+            const parsed = JSON.parse(demoTransactions) as Transaction[]
+            setTransactions(prev => {
+              const existingIds = new Set(prev.map(t => t.id))
+              const newDemos = parsed.filter((t: Transaction) => !existingIds.has(t.id))
+              const all = [...newDemos, ...prev]
+              return all.sort((a, b) => 
+                new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+              )
+            })
+          } catch (error) {
+            console.error('Error parsing demo transactions:', error)
+          }
+        }
+      }, 200)
+    }
+    
+    window.addEventListener('focus', handleFocus)
+    
     return () => {
       window.removeEventListener('transactionCreated', handleTransactionCreated as EventListener)
+      window.removeEventListener('focus', handleFocus)
     }
   }, [])
 
